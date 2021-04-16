@@ -3,6 +3,8 @@ from player.parser import *
 import time
 from statistics import mean
 
+from base.whiteboard import Whiteboard
+
 
 class R2A_AverageThroughput(IR2A):
 
@@ -21,14 +23,24 @@ class R2A_AverageThroughput(IR2A):
         parsed_mpd = parse_mpd(msg.get_payload())
         self.qi = parsed_mpd.get_qi()
 
+        #get_mpd_info
+        #print(f"{msg.get_payload()} ===================================================")
+
         t = time.perf_counter() - self.request_time
         self.throughputs.append(msg.get_bit_length() / t)
+
+        
 
         self.send_up(msg)
 
     def handle_segment_size_request(self, msg):
+
+        print(f"{self.whiteboard.get_amount_video_to_play()} ===================================================")
+
         self.request_time = time.perf_counter()
         avg = mean(self.throughputs) / 2
+
+        
 
         selected_qi = self.qi[0]
         for i in self.qi:
