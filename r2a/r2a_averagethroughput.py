@@ -39,7 +39,7 @@ class R2A_AverageThroughput(IR2A):
         self.buffer = self.whiteboard.get_amount_video_to_play()
 
         print(f" BUFFER {self.buffer} ===================================================")
-        print(f" MEDIA {self.vazao} ===================================================\n")
+        print(f" VAZAO {self.vazao} ===================================================\n")
 
         self.request_time = time.perf_counter()
 
@@ -63,29 +63,29 @@ class R2A_AverageThroughput(IR2A):
                         self.vazao = self.vazao * 0.5
                         print(f" VAZAO 60% ===================================================\n")
 
-       
-        if self.buffer > 40:
+        if self.buffer > 40 or self.vazao >= self.qi[19]:
             selected_qi = self.qi[19]
         else:
-            if self.buffer > 35:
+            if self.buffer > 35 or self.vazao >= self.qi[18]:
                 selected_qi = self.qi[18]
             else:
-                if self.buffer > 30:
+                if self.buffer > 30 or self.vazao >= self.qi[16]:
                     selected_qi = self.qi[16]
                 else:
-                    if self.buffer > 25:
+                    if self.buffer > 25 or self.vazao >= self.qi[15]:
                         selected_qi = self.qi[15]
                     else:
-                        if self.buffer > 20:
+                        if self.buffer > 20 or self.vazao >= self.qi[14]:
                             selected_qi = self.qi[14]
                         else:
-                            if self.buffer > 15:
+                            if self.buffer > 15 or self.vazao >= self.qi[12]:
                                 selected_qi = self.qi[12]
                             else:
                                 selected_qi = self.qi[6]
                                 for i in self.qi:
                                     if self.vazao > i:
                                         selected_qi = i
+
 
         msg.add_quality_id(selected_qi)
         self.send_down(msg)
