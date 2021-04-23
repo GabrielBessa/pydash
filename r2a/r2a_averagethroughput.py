@@ -10,9 +10,11 @@ class R2A_AverageThroughput(IR2A):
 
     def __init__(self, id):
         IR2A.__init__(self, id)
-        self.throughputs = []
+        # self.throughputs = []
         self.request_time = 0
         self.qi = []
+        self.vazao = 0
+        self.buffer = 0
 
     def handle_xml_request(self, msg):
         self.request_time = time.perf_counter()
@@ -23,36 +25,78 @@ class R2A_AverageThroughput(IR2A):
         parsed_mpd = parse_mpd(msg.get_payload())
         self.qi = parsed_mpd.get_qi()
 
-        #get_mpd_info
-        #print(f"{msg.get_payload()} ===================================================")
 
         t = time.perf_counter() - self.request_time
-        self.throughputs.append(msg.get_bit_length() / t)
+        # self.throughputs.append(msg.get_bit_length() / t)
+
+        self.vazao = msg.get_bit_length() / t
 
         
 
         self.send_up(msg)
 
     def handle_segment_size_request(self, msg):
+        self.buffer = self.whiteboard.get_amount_video_to_play()
 
-        print(f"{self.whiteboard.get_amount_video_to_play()} ===================================================")
+        print(f" BUFFER {self.buffer} ===================================================")
+        print(f" MEDIA {self.vazao} ===================================================\n")
 
         self.request_time = time.perf_counter()
-        avg = mean(self.throughputs) / 2
 
-        
+        # avg = mean(self.throughputs) / 2
 
-        selected_qi = self.qi[0]
-        for i in self.qi:
-            if avg > i:
-                selected_qi = i
+        self.vazao = self.vazao * 0.4
+
+        if self.buffer > 10:
+            self.vazao = self.vazao
+            print(f" VAZAO TOTAL ===================================================\n")
+        else: 
+            if self.buffer > 7:
+                self.vazao = self.vazao * 0.8
+                print(f" VAZAO 90% ===================================================\n")
+            else:
+                if self.buffer > 5:
+                    self.vazao = self.vazao * 0.7
+                    print(f" VAZAO 80% ===================================================\n")
+                else:
+                    if self.buffer > 2:
+                        self.vazao = self.vazao * 0.5
+                        print(f" VAZAO 60% ===================================================\n")
+
+       
+        if self.buffer > 40:
+            selected_qi = self.qi[19]
+        else:
+            if self.buffer > 35:
+                selected_qi = self.qi[18]
+            else:
+                if self.buffer > 30:
+                    selected_qi = self.qi[16]
+                else:
+                    if self.buffer > 25:
+                        selected_qi = self.qi[15]
+                    else:
+                        if self.buffer > 20:
+                            selected_qi = self.qi[14]
+                        else:
+                            if self.buffer > 15:
+                                selected_qi = self.qi[12]
+                            else:
+                                selected_qi = self.qi[6]
+                                for i in self.qi:
+                                    if self.vazao > i:
+                                        selected_qi = i
 
         msg.add_quality_id(selected_qi)
         self.send_down(msg)
 
     def handle_segment_size_response(self, msg):
         t = time.perf_counter() - self.request_time
-        self.throughputs.append(msg.get_bit_length() / t)
+
+        # self.throughputs.append(msg.get_bit_length() / t)
+
+        self.vazao = msg.get_bit_length() / t
+
         self.send_up(msg)
 
     def initialize(self):
