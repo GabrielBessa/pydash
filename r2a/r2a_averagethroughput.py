@@ -22,14 +22,16 @@ class R2A_AverageThroughput(IR2A):
 
         parsed_mpd = parse_mpd(msg.get_payload())
         self.qi = parsed_mpd.get_qi()
-
         #get_mpd_info
         #print(f"{msg.get_payload()} ===================================================")
 
         t = time.perf_counter() - self.request_time
         self.throughputs.append(msg.get_bit_length() / t)
-
-        
+        print("")
+        # print("MSG: ", msg.get_payload(), "\n")
+        print("THROUGHPUT: ", self.throughputs)
+        print("BIT LENGTH: ", msg.get_bit_length())
+        print("")
 
         self.send_up(msg)
 
@@ -39,11 +41,13 @@ class R2A_AverageThroughput(IR2A):
 
         self.request_time = time.perf_counter()
         avg = mean(self.throughputs) / 2
+        print("THROUGHPUT: ", self.throughputs)
+        print("AVERAGE: ", avg)
 
-        
 
         selected_qi = self.qi[0]
         for i in self.qi:
+            print("QUALITY INSIDE ARRAY: ", i)
             if avg > i:
                 selected_qi = i
 
@@ -53,6 +57,9 @@ class R2A_AverageThroughput(IR2A):
     def handle_segment_size_response(self, msg):
         t = time.perf_counter() - self.request_time
         self.throughputs.append(msg.get_bit_length() / t)
+        print("THROUGHPUT: ", self.throughputs)
+        print("BIT LENGTH: ", msg.get_bit_length())
+
         self.send_up(msg)
 
     def initialize(self):
