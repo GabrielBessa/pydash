@@ -13,6 +13,8 @@ class R2A_AverageThroughput(IR2A):
         self.throughputs = []
         self.request_time = 0
         self.qi = []
+        self.download_time = 0
+        self.arbitrary_qi = 46900
 
     def handle_xml_request(self, msg):
         self.request_time = time.perf_counter()
@@ -29,8 +31,10 @@ class R2A_AverageThroughput(IR2A):
         self.throughputs.append(msg.get_bit_length() / t)
         print("")
         # print("MSG: ", msg.get_payload(), "\n")
-        print("THROUGHPUT: ", self.throughputs)
-        print("BIT LENGTH: ", msg.get_bit_length())
+        self.download_time = t/self.arbitrary_qi
+        print("TEMPO DE DOWNLOAD: ", self.download_time, "\n")
+        # print("THROUGHPUT: ", self.throughputs)
+        # print("BIT LENGTH: ", msg.get_bit_length())
         print("")
 
         self.send_up(msg)
