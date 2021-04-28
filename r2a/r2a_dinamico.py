@@ -48,7 +48,7 @@ class R2A_Dinamico(IR2A):
         if not self.flag:
             self.inicio += 1
             for i in self.qi:
-                if self.throughputs[-1] * 0.6 > i:
+                if self.throughputs[-1] * 0.8 > i:
                     self.selected_qi = i
             if self.inicio == 2:
                 self.flag = True
@@ -62,7 +62,7 @@ class R2A_Dinamico(IR2A):
             if pos < 5:
                 min_buffer = 15
 
-            if tempo_down_prox < 0.70 and self.buffer[-1] >= min_buffer:
+            if tempo_down_prox < 0.60 and self.buffer[-1] >= min_buffer:
                 if pos < 19:
                     self.selected_qi = self.qi[pos+1]
 
@@ -71,30 +71,31 @@ class R2A_Dinamico(IR2A):
             tam_QIs = len(self.lista_qi_selects)
             if tam_QIs > 1:
                 pos = self.qi.index(self.selected_qi)
-
-                if self.lista_qi_selects[-1] == pos:
-                    if pos > 10:
-                        if self.temp_dow > 0.60 and self.buffer[-1] < 20:
-                            pos = self.qi.index(self.selected_qi)
-                            if pos > 0:
-                                self.selected_qi = self.qi[pos-1]
-                            else:
-                                self.selected_qi = self.qi[0]
-                    else:
-                        if pos > 8:
-                           if self.temp_dow > 0.60 and self.buffer[-1] < 16:
+                tam = len(self.buffer)
+                if tam > 1:
+                    if self.lista_qi_selects[-1] == pos:
+                        if pos > 12:
+                            if self.temp_dow > 0.70 and self.buffer[-1] < 20 and self.buffer[-1] < self.buffer[-2]:
                                 pos = self.qi.index(self.selected_qi)
                                 if pos > 0:
                                     self.selected_qi = self.qi[pos-1]
                                 else:
                                     self.selected_qi = self.qi[0]
                         else:
-                            if self.temp_dow > 0.50 and self.buffer[-1] < 11:
-                                pos = self.qi.index(self.selected_qi)
-                                if pos > 0:
-                                    self.selected_qi = self.qi[pos-1]
-                                else:
-                                    self.selected_qi = self.qi[0]
+                            if pos > 8:
+                                if self.temp_dow > 0.70 and self.buffer[-1] < 15 and self.buffer[-1] < self.buffer[-2]:
+                                    pos = self.qi.index(self.selected_qi)
+                                    if pos > 0:
+                                        self.selected_qi = self.qi[pos-1]
+                                    else:
+                                        self.selected_qi = self.qi[0]
+                            else:
+                                if self.temp_dow > 0.60 and self.buffer[-1] < 11 and self.buffer[-1] < self.buffer[-2]:
+                                    pos = self.qi.index(self.selected_qi)
+                                    if pos > 0:
+                                        self.selected_qi = self.qi[pos-1]
+                                    else:
+                                        self.selected_qi = self.qi[0]
 
             print(f"Temp Down: {self.temp_dow} ||| Temp Down Prox: {tempo_down_prox} ================================\n")
 
@@ -115,7 +116,7 @@ class R2A_Dinamico(IR2A):
         self.send_down(msg)
 
     def handle_segment_size_response(self, msg):
-        
+
         t = time.perf_counter() - self.request_time
         self.throughputs.append(msg.get_bit_length() / t)
         self.send_up(msg)
