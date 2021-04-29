@@ -48,7 +48,7 @@ class R2A_Dinamico(IR2A):
         if not self.flag:
             self.inicio += 1
             for i in self.qi:
-                if self.throughputs[-1] * 0.8 > i:
+                if self.throughputs[-1] * 0.4 > i:
                     self.selected_qi = i
             if self.inicio == 2:
                 self.flag = True
@@ -75,7 +75,7 @@ class R2A_Dinamico(IR2A):
                 if tam > 1:
                     if self.lista_qi_selects[-1] == pos:
                         if pos > 12:
-                            if self.temp_dow > 0.70 and self.buffer[-1] < 20 and self.buffer[-1] < self.buffer[-2]:
+                            if self.temp_dow > 0.70 and self.buffer[-1] < 20 and (self.buffer[-1] < self.buffer[-2] or self.buffer[-1] <= 5):
                                 pos = self.qi.index(self.selected_qi)
                                 if pos > 0:
                                     self.selected_qi = self.qi[pos-1]
@@ -83,14 +83,14 @@ class R2A_Dinamico(IR2A):
                                     self.selected_qi = self.qi[0]
                         else:
                             if pos > 8:
-                                if self.temp_dow > 0.70 and self.buffer[-1] < 15 and self.buffer[-1] < self.buffer[-2]:
+                                if self.temp_dow > 0.70 and self.buffer[-1] < 15 and (self.buffer[-1] < self.buffer[-2] or self.buffer[-1] <= 5):
                                     pos = self.qi.index(self.selected_qi)
                                     if pos > 0:
                                         self.selected_qi = self.qi[pos-1]
                                     else:
                                         self.selected_qi = self.qi[0]
                             else:
-                                if self.temp_dow > 0.60 and self.buffer[-1] < 11 and self.buffer[-1] < self.buffer[-2]:
+                                if self.temp_dow > 0.60 and self.buffer[-1] < 11 and (self.buffer[-1] < self.buffer[-2] or self.buffer[-1] <= 5):
                                     pos = self.qi.index(self.selected_qi)
                                     if pos > 0:
                                         self.selected_qi = self.qi[pos-1]
