@@ -22,6 +22,23 @@ class R2A_Dinamico(IR2A):
         self.limite_bff_baixo = 0
         self.inicio = 0
 
+    def throughput_compare(self, current_throughput, previous_throughputs, current_qi, qi_list):
+        current_len = len(previous_throughputs)
+        print("VAZAO CORRENTE PAPAI: ", current_throughput)
+        print("============================") 
+        print("ULTIMAS 3 PAPAI: ", mean(previous_throughputs[(len(previous_throughputs)-6):-2]))
+        print("============================")
+        print("MEDIA DAS ULTIMAS 3 QUALIDADES: ", mean(qi_list[(len(qi_list)-4):-1]))
+        print("============================")
+        print("QUALIDADE SELECIONADA PAPAI:", current_qi)
+        print("============================")
+        if current_throughput > mean(previous_throughputs[(len(previous_throughputs)-6):-2]):
+            if current_qi == mean(qi_list[(len(qi_list)-4):-1]):
+                return True
+            else:
+                return False
+        
+
     def handle_xml_request(self, msg):
 
         self.request_time = time.perf_counter()
@@ -46,25 +63,24 @@ class R2A_Dinamico(IR2A):
         self.request_time = time.perf_counter()
 
         if not self.flag:
-            self.inicio += 1
-            for i in self.qi:
-                if self.throughputs[-1] * 0.3 > i:
-                    self.selected_qi = i
-            if self.inicio == 2:
-                self.flag = True
+            self.selected_qi = self.qi[6]            
+            self.flag = True
 
         if self.flag:
             pos = self.qi.index(self.selected_qi)
             if pos < 19:
                 tempo_down_prox = self.qi[pos+1] / self.throughputs[-1]
 
-            min_buffer = 30
+            min_buffer = 40
             if pos < 5:
-                min_buffer = 15
+                min_buffer = 20
 
             if tempo_down_prox < 0.50 and self.buffer[-1] >= min_buffer:
                 if pos < 19:
-                    self.selected_qi = self.qi[pos+1]
+                    result = self.throughput_compare(self.throughputs[-1], self.throughputs, self.qi.index(self.selected_qi), self.lista_qi_selects)
+                    print(result)
+                    if result == True:
+                        self.selected_qi = self.qi[pos+1]
 
             self.temp_dow = self.selected_qi / self.throughputs[-1]
 
