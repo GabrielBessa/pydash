@@ -22,17 +22,10 @@ class R2A_Dinamico(IR2A):
         self.limite_bff_baixo = 0
         self.inicio = 0
 
-    def throughput_compare(self, current_throughput, previous_throughputs, current_qi, qi_list):
-        current_len = len(previous_throughputs)
-        print("VAZAO CORRENTE PAPAI: ", current_throughput)
-        print("============================") 
-        print("ULTIMAS 3 PAPAI: ", mean(previous_throughputs[(len(previous_throughputs)-6):-2]))
-        print("============================")
-        print("MEDIA DAS ULTIMAS 3 QUALIDADES: ", mean(qi_list[(len(qi_list)-4):-1]))
-        print("============================")
-        print("QUALIDADE SELECIONADA PAPAI:", current_qi)
-        print("============================")
+    def can_upgrade(self, current_throughput, previous_throughputs, current_qi, qi_list):
+        # Compara se a vazao atual eh maior que a media das 5 ultimas
         if current_throughput > mean(previous_throughputs[(len(previous_throughputs)-6):-2]):
+            # Compara o valor da qualidade atual com as 3 ultimas para ver se pode mandar subir
             if current_qi == mean(qi_list[(len(qi_list)-4):-1]):
                 return True
             else:
@@ -62,22 +55,26 @@ class R2A_Dinamico(IR2A):
 
         self.request_time = time.perf_counter()
 
+        # Flag para controlar qualidade na primeira iteracao
         if not self.flag:
             self.selected_qi = self.qi[6]            
             self.flag = True
-
+        # Operacao depois que a primeira qualidade foi setada
         if self.flag:
             pos = self.qi.index(self.selected_qi)
             if pos < 19:
                 tempo_down_prox = self.qi[pos+1] / self.throughputs[-1]
-
+                
             min_buffer = 40
             if pos < 5:
                 min_buffer = 20
 
             if tempo_down_prox < 0.50 and self.buffer[-1] >= min_buffer:
                 if pos < 19:
-                    result = self.throughput_compare(self.throughputs[-1], self.throughputs, self.qi.index(self.selected_qi), self.lista_qi_selects)
+                    result = self.can_upgrade(self.throughputs[-1],
+                                                     self.throughputs,
+                                                      self.qi.index(self.selected_qi),
+                                                        self.lista_qi_selects)
                     print(result)
                     if result == True:
                         self.selected_qi = self.qi[pos+1]
@@ -88,6 +85,7 @@ class R2A_Dinamico(IR2A):
             pos = self.qi.index(self.selected_qi)
             tam = len(self.buffer)
             if tam > 1:
+                # Comparacao do tempo de download com o tamanho do buffer(19) e os dois ultimos valores do buffer
                 if pos > 12:
                     if self.temp_dow > 0.50 and self.buffer[-1] < 20 and (self.buffer[-1] < self.buffer[-2] or self.buffer[-1] <= 5):
                         pos = self.qi.index(self.selected_qi)
@@ -96,6 +94,7 @@ class R2A_Dinamico(IR2A):
                         else:
                             self.selected_qi = self.qi[0]
                 else:
+                    # Comparacao do tempo de download com o tamanho do buffer(14) e os dois ultimos valores do buffer
                     if pos > 8:
                         if self.temp_dow > 0.50 and self.buffer[-1] < 15 and (self.buffer[-1] < self.buffer[-2] or self.buffer[-1] <= 5):
                             pos = self.qi.index(self.selected_qi)
@@ -104,6 +103,7 @@ class R2A_Dinamico(IR2A):
                             else:
                                 self.selected_qi = self.qi[0]
                     else:
+                        # Comparacao do tempo de download com o tamanho do buffer(10) e os dois ultimos valores do buffer
                         if self.temp_dow > 0.50 and self.buffer[-1] < 11 and (self.buffer[-1] < self.buffer[-2] or self.buffer[-1] <= 5):
                             pos = self.qi.index(self.selected_qi)
                             if pos > 0:
