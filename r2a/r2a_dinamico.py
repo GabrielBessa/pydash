@@ -1,3 +1,8 @@
+""" 
+    Gabriel Cunha Bessa Vieira 16/0120811
+    Lucas Junior Ribas - 16/0052289
+"""
+
 from r2a.ir2a import IR2A
 from player.parser import *
 import time
@@ -64,7 +69,7 @@ class R2A_Dinamico(IR2A):
             pos = self.qi.index(self.selected_qi)
             if pos < 19:
                 tempo_down_prox = self.qi[pos+1] / self.throughputs[-1]
-                
+
             min_buffer = 40
             if pos < 5:
                 min_buffer = 20
