@@ -1,7 +1,9 @@
 # PyDash - Implementação R2A-Dinâmico
 
 **Gabriel Cunha Bessa Vieira 16/0120811**
-**## Lucas Junior Ribas - 16/0052289**
+
+**Lucas Junior Ribas - 16/0052289**
+
 **Trasmissão de Dados - Turma A - Marcos Fagundes Caetano**
 
 # pyDash: A Framework Based Educational Tool for Adaptive Streaming Video Algorithms Study
